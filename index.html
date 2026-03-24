@@ -151,6 +151,10 @@
     <div class="sub" id="done-time-text">—</div>
   </div>
 
+  <div id="yesterday-btn-wrap" style="margin-bottom:16px;display:none">
+    <button class="btn-small" style="width:100%;padding:10px;font-size:13px;color:var(--accent2);border-color:var(--accent2)" onclick="confirmYesterday()">¿Hiciste la rutina ayer y no la registraste? Marcar ayer</button>
+  </div>
+
   <div class="phase-card" id="phase-card">
     <div class="phase-title" id="phase-title">Semana 1 — fase inicial</div>
     <div id="phase-desc" style="font-size:13px;color:var(--text)">Consolida el hábito</div>
@@ -466,6 +470,13 @@ function showDoneToday() {
     document.getElementById('btn-confirm').disabled = true;
     document.getElementById('btn-confirm').textContent = '✓ Completado';
     document.getElementById('confirm-hint').textContent = '';
+  // Show yesterday button if yesterday not confirmed
+  const yd = new Date(); yd.setDate(yd.getDate()-1);
+  while(isWeekend(yd)) yd.setDate(yd.getDate()-1);
+  const yk = toDateKey(yd);
+  if (!state.log[yk] || !state.log[yk].confirmed) {
+    document.getElementById('yesterday-btn-wrap').style.display = 'block';
+  }
   }
 }
 
@@ -573,6 +584,21 @@ function showNotif(msg) {
 }
 
 // ── INIT ─────────────────────────────────────────────────────
+
+function confirmYesterday() {
+  const d = new Date(); d.setDate(d.getDate()-1);
+  while (isWeekend(d)) d.setDate(d.getDate()-1);
+  const key = toDateKey(d);
+  if (state.log[key] && state.log[key].confirmed) { showNotif("Ayer ya estaba marcado"); return; }
+  state.log[key] = { confirmed:true, time:"—", series:{hang:1,flex:1,squat:1,rotation:1}, retroactive:true };
+  if (!state.startDate) state.startDate = key;
+  const streak = calculateStreak();
+  saveState(state);
+  document.getElementById("streak-display").textContent = streak;
+  document.getElementById("yesterday-btn-wrap").style.display = "none";
+  renderHistory();
+  showNotif("Ayer marcado como completado");
+}
 function init() {
   checkMissedDays();
   updateHeader();
