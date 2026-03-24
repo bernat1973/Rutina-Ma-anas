@@ -39,28 +39,32 @@
   .time-input { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 6px 10px; width: 90px; }
   .btn-small { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; padding: 6px 12px; cursor: pointer; transition: color 0.15s, border-color 0.15s; font-family: 'DM Sans', sans-serif; }
   .btn-small:hover { color: var(--text); border-color: var(--text); }
-  .notif-btn { background: var(--surface2); border: 1px solid var(--accent); border-radius: 8px; color: var(--accent); font-size: 12px; padding: 6px 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 6px; width: 100%; }
-  .notif-btn.granted { border-color: var(--border); color: var(--muted); cursor: default; }
   .section-title { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 12px; margin-top: 8px; }
-  .week-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 4px 10px; font-size: 11px; color: var(--accent2); font-family: 'DM Mono', monospace; margin-bottom: 14px; }
+  .phase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+  .phase-title { font-size: 12px; color: var(--accent2); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
+  .phase-next { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 6px; }
+  .phase-bar-wrap { background: var(--surface2); border-radius: 3px; height: 3px; margin-top: 8px; }
+  .phase-bar { height: 100%; background: var(--accent2); border-radius: 3px; transition: width 0.5s; }
   .exercise-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-  .exercise-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none; -webkit-tap-highlight-color: transparent; }
-  .exercise-card:active { transform: scale(0.98); }
+  .exercise-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; transition: border-color 0.2s, background 0.2s; }
   .exercise-card.done { border-color: var(--accent); background: #161d0e; }
   .exercise-card.done .ex-name { color: var(--accent); }
-  .exercise-card.done .ex-check { background: var(--accent); border-color: var(--accent); }
-  .exercise-card.done .ex-check::after { opacity: 1; }
-  .ex-check { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--surface2); flex-shrink: 0; position: relative; transition: background 0.2s, border-color 0.2s; }
-  .ex-check::after { content: ''; position: absolute; left: 7px; top: 4px; width: 6px; height: 10px; border: 2px solid var(--bg); border-top: none; border-left: none; transform: rotate(45deg); opacity: 0; transition: opacity 0.15s; }
+  .ex-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .ex-icon { font-size: 20px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border-radius: 10px; flex-shrink: 0; }
   .ex-info { flex: 1; }
   .ex-name { font-size: 15px; font-weight: 500; color: var(--text); transition: color 0.2s; }
   .ex-detail { font-size: 12px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
-  .ex-icon { font-size: 20px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--surface2); border-radius: 10px; flex-shrink: 0; }
+  .series-selector { display: flex; gap: 6px; }
+  .series-btn { flex: 1; padding: 8px 4px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; text-align: center; -webkit-tap-highlight-color: transparent; }
+  .series-btn:active { transform: scale(0.96); }
+  .series-btn.selected { background: #161d0e; border-color: var(--accent); color: var(--accent); }
+  .series-btn.selected-0 { background: var(--surface2); border-color: var(--border); color: var(--muted); }
   .timer-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 24px; }
   .timer-display { font-family: 'DM Mono', monospace; font-size: 56px; font-weight: 300; text-align: center; color: var(--text); letter-spacing: -0.02em; line-height: 1; margin: 12px 0; }
   .timer-display.running { color: var(--accent); }
   .timer-display.stopped { color: var(--warn); }
-  .timer-label { text-align: center; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; }
+  .timer-label { text-align: center; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .timer-message { text-align: center; font-size: 14px; font-weight: 500; color: var(--accent2); min-height: 20px; margin-bottom: 8px; transition: opacity 0.3s; }
   .timer-buttons { display: flex; gap: 10px; }
   .btn-timer { flex: 1; padding: 13px; border-radius: 12px; border: none; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.15s, transform 0.1s; }
   .btn-timer:active { transform: scale(0.97); }
@@ -70,18 +74,22 @@
   .timer-best { text-align: center; font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 12px; }
   .progress-wrap { background: var(--surface2); border-radius: 4px; height: 4px; margin: 10px 0; overflow: hidden; }
   .progress-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 1s linear; }
+  .hang-history { display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap; }
+  .hang-dot { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); }
+  .hang-dot.best { border-color: var(--accent); color: var(--accent); }
   .btn-confirm { width: 100%; padding: 18px; background: var(--accent); color: #0f0f0e; border: none; border-radius: var(--radius); font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-bottom: 12px; transition: opacity 0.2s, transform 0.1s; letter-spacing: 0.02em; }
   .btn-confirm:disabled { opacity: 0.3; cursor: not-allowed; }
   .btn-confirm:not(:disabled):active { transform: scale(0.98); }
-  .confirm-hint { text-align: center; font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .confirm-hint { text-align: center; font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 24px; }
   .history-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 24px; }
-  .history-day { aspect-ratio: 1; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-direction: column; gap: 2px; }
+  .history-day { aspect-ratio: 1; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 10px; font-family: 'DM Mono', monospace; color: var(--muted); flex-direction: column; gap: 1px; cursor: default; }
   .history-day.completed { background: #161d0e; border-color: var(--accent); }
   .history-day.completed .hd-dot { background: var(--accent); }
   .history-day.missed { background: #1a0e0e; border-color: var(--danger); opacity: 0.6; }
-  .history-day.rest { background: var(--surface); border-style: dashed; }
+  .history-day.rest { border-style: dashed; }
   .history-day.today { border-color: var(--accent2); color: var(--accent2); }
-  .hd-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); }
+  .hd-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--border); }
+  .hd-series { font-size: 8px; color: var(--accent); }
   .celebration { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
   .celebration.show { display: flex; }
   .cel-emoji { font-size: 64px; animation: bounce 0.6s ease infinite alternate; }
@@ -95,11 +103,6 @@
   .done-today-banner .big { font-size: 40px; margin-bottom: 8px; }
   .done-today-banner .msg { font-size: 16px; font-weight: 500; color: var(--accent); }
   .done-today-banner .sub { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
-  .phase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
-  .phase-title { font-size: 12px; color: var(--accent2); font-family: 'DM Mono', monospace; margin-bottom: 6px; }
-  .phase-next { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 6px; }
-  .phase-bar-wrap { background: var(--surface2); border-radius: 3px; height: 3px; margin-top: 8px; }
-  .phase-bar { height: 100%; background: var(--accent2); border-radius: 3px; transition: width 0.5s; }
 </style>
 </head>
 <body>
@@ -111,7 +114,7 @@
   <button class="btn-cel" onclick="closeCelebration()">Cerrar</button>
 </div>
 
-<div class="notif-banner" id="notif-banner">⏰ 08:00 — Hora de la rutina</div>
+<div class="notif-banner" id="notif-banner"></div>
 
 <div class="header">
   <div class="date-block">
@@ -131,9 +134,6 @@
       <input type="time" class="time-input" id="alarm-input" value="08:00">
       <button class="btn-small" onclick="saveAlarm()">Guardar</button>
     </div>
-    <button class="notif-btn" id="notif-perm-btn" onclick="requestNotifPermission()">
-      Activar notificaciones del móvil
-    </button>
   </div>
   <div class="alarm-right">
     <div class="alarm-status mono" id="alarm-status-text">Activa</div>
@@ -153,7 +153,7 @@
 
   <div class="phase-card" id="phase-card">
     <div class="phase-title" id="phase-title">Semana 1 — fase inicial</div>
-    <div id="phase-desc" style="font-size:13px;color:var(--text)">Consolidar técnica y hábito</div>
+    <div id="phase-desc" style="font-size:13px;color:var(--text)">Consolida el hábito</div>
     <div class="phase-next" id="phase-next"></div>
     <div class="phase-bar-wrap"><div class="phase-bar" id="phase-bar" style="width:0%"></div></div>
   </div>
@@ -161,11 +161,13 @@
   <div class="timer-section" id="timer-section">
     <div class="section-title">Dead hang — cronómetro</div>
     <div class="timer-label" id="timer-label-text">LISTO PARA COLGAR</div>
+    <div class="timer-message" id="timer-message"></div>
     <div class="timer-display mono" id="timer-display">0:00</div>
     <div class="progress-wrap">
       <div class="progress-bar" id="timer-progress" style="width:0%"></div>
     </div>
-    <div class="timer-best">Mejor: <span id="best-time-display">—</span> &nbsp;·&nbsp; Objetivo: <span style="color:var(--warn)">2:00</span></div>
+    <div class="timer-best">Hoy: <span id="today-hang-display">—</span> &nbsp;·&nbsp; Mejor: <span id="best-time-display">—</span> &nbsp;·&nbsp; Objetivo: <span style="color:var(--warn)">2:00</span></div>
+    <div class="hang-history" id="hang-history"></div>
     <div class="timer-buttons" style="margin-top:16px">
       <button class="btn-timer btn-start" id="btn-start" onclick="startTimer()">Iniciar</button>
       <button class="btn-timer btn-stop" id="btn-stop" onclick="stopTimer()" style="display:none">Parar</button>
@@ -179,110 +181,96 @@
   <button class="btn-confirm" id="btn-confirm" onclick="confirmWorkout()" disabled>
     Confirmar rutina completa
   </button>
-  <div class="confirm-hint" id="confirm-hint">Completa todos los ejercicios primero</div>
+  <div class="confirm-hint" id="confirm-hint">Selecciona las series de cada ejercicio</div>
 </div>
 
 <div class="section-title" style="margin-top:8px">Últimas 4 semanas</div>
 <div class="history-grid" id="history-grid"></div>
 
 <script>
-const STORAGE_KEY = 'rutina_v3';
+const STORAGE_KEY = 'rutina_v4';
 
-// ── FASES DE PROGRESIÓN ─────────────────────────────────────
 const PHASES = [
-  { weeks: [1,2,3],   label: 'Fase 1 — base',      desc: 'Técnica y hábito',          flex: '3 × 10-12', squat: '3 × 15-20', rotation: '2 × 15' },
-  { weeks: [4,5],     label: 'Fase 2 — volumen',    desc: 'Más series, pausa abajo',   flex: '4 × 12-15', squat: '3 × 15-20 + pausa', rotation: '2 × 15' },
-  { weeks: [6,7,8],   label: 'Fase 3 — intensidad', desc: 'Series completas',          flex: '4 × 15',    squat: '4 × 20', rotation: '3 × 15' },
-  { weeks: [9,10,11,12], label: 'Fase 4 — avanzado', desc: 'Variantes más duras',     flex: '4 × 12 pies elevados', squat: '3 × 12 búlgara', rotation: '3 × 15' },
+  { weeks:[1,2,3],      label:'Fase 1 — base',       desc:'Consolida el hábito',         flex:'hasta 3 × 10-12', squat:'hasta 3 × 15-20', rotation:'hasta 2 × 15' },
+  { weeks:[4,5],        label:'Fase 2 — volumen',     desc:'Más series, pausa abajo',     flex:'4 × 12-15',       squat:'3 × 15-20 + pausa', rotation:'2 × 15' },
+  { weeks:[6,7,8],      label:'Fase 3 — intensidad',  desc:'Series completas',            flex:'4 × 15',          squat:'4 × 20', rotation:'3 × 15' },
+  { weeks:[9,10,11,12], label:'Fase 4 — avanzado',    desc:'Variantes más duras',         flex:'4 × 12 pies elev.', squat:'3 × 12 búlgara', rotation:'3 × 15' },
 ];
 
-function getPhase(weekNum) {
-  for (const p of PHASES) {
-    if (p.weeks.includes(weekNum)) return p;
-  }
-  return PHASES[PHASES.length - 1];
-}
+const MESSAGES = [
+  { sec:15, msg:'¡Bien! Sigue...' },
+  { sec:30, msg:'¡30 segundos! 💪' },
+  { sec:45, msg:'¡Aguanta!' },
+  { sec:60, msg:'¡1 minuto! Mitad del objetivo' },
+  { sec:75, msg:'¡Casi! Empuja un poco más' },
+  { sec:90, msg:'¡90 segundos! Estás muy cerca' },
+  { sec:105, msg:'¡15 segundos para el objetivo!' },
+  { sec:120, msg:'🎯 ¡2 MINUTOS! ¡OBJETIVO!' },
+];
 
-function getExercises(phase) {
-  return [
-    { id: 'hang',     name: 'Dead hang',        detail: '1 serie · objetivo 2:00', icon: '🧗' },
-    { id: 'flex',     name: 'Flexiones',        detail: phase.flex,                icon: '💪' },
-    { id: 'squat',    name: 'Sentadillas',      detail: phase.squat,               icon: '🏋️' },
-    { id: 'rotation', name: 'Rotación hombro',  detail: phase.rotation,            icon: '🔄' },
-  ];
-}
-
-// ── STATE ───────────────────────────────────────────────────
-function loadState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
-}
+function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; } }
 function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 
 let state = loadState();
-if (!state.log)        state.log = {};
-if (!state.streak)     state.streak = 0;
-if (!state.bestHang)   state.bestHang = 0;
-if (!state.alarmTime)  state.alarmTime = '08:00';
-if (!state.alarmOn)    state.alarmOn = true;
-if (!state.startDate)  state.startDate = null;
+if (!state.log)       state.log = {};
+if (!state.bestHang)  state.bestHang = 0;
+if (!state.alarmTime) state.alarmTime = '08:00';
+if (!state.alarmOn)   state.alarmOn = true;
+if (!state.startDate) state.startDate = null;
+if (!state.hangLog)   state.hangLog = {};
 
-// ── DATES ───────────────────────────────────────────────────
-function localNow() {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Madrid' }));
-}
-function toDateKey(d) {
-  return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' });
-}
+function localNow() { return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Madrid' })); }
+function toDateKey(d) { return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }); }
 function today() { return toDateKey(new Date()); }
-function isWeekend(d) {
-  const day = new Date(new Date(d).toLocaleString('en-US', { timeZone: 'Europe/Madrid' })).getDay();
-  return day === 0 || day === 6;
-}
+function isWeekend(d) { return [0,6].includes(new Date(new Date(d).toLocaleString('en-US',{timeZone:'Europe/Madrid'})).getDay()); }
 
 function getWeekNumber() {
   if (!state.startDate) return 1;
-  const start = new Date(state.startDate);
-  const now = new Date();
-  const diff = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+  const diff = Math.floor((new Date() - new Date(state.startDate)) / 86400000);
   return Math.min(Math.floor(diff / 7) + 1, 12);
 }
+function getCurrentPhase() { const w = getWeekNumber(); return PHASES.find(p => p.weeks.includes(w)) || PHASES[PHASES.length-1]; }
 
-function getCurrentPhase() {
-  return getPhase(getWeekNumber());
-}
-
-// ── STREAK Y RACHA ROTA ─────────────────────────────────────
 function calculateStreak() {
   let streak = 0;
   const d = new Date();
   const todayKey = today();
   while (true) {
     const key = toDateKey(d);
-    if (isWeekend(d)) { d.setDate(d.getDate() - 1); continue; }
-    if (key === todayKey && !(state.log[key] && state.log[key].confirmed)) {
-      d.setDate(d.getDate() - 1); continue;
-    }
-    if (state.log[key] && state.log[key].confirmed) {
-      streak++;
-      d.setDate(d.getDate() - 1);
-    } else { break; }
+    if (isWeekend(d)) { d.setDate(d.getDate()-1); continue; }
+    if (key === todayKey && !(state.log[key] && state.log[key].confirmed)) { d.setDate(d.getDate()-1); continue; }
+    if (state.log[key] && state.log[key].confirmed) { streak++; d.setDate(d.getDate()-1); }
+    else break;
   }
   return streak;
 }
 
 function checkMissedDays() {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  for (let i = 0; i < 14; i++) {
+  if (!state.startDate) return;
+  const d = new Date(); d.setDate(d.getDate()-1);
+  for (let i = 0; i < 28; i++) {
     const key = toDateKey(d);
-    if (!isWeekend(d) && state.log[key] === undefined) {
+    if (!isWeekend(d) && new Date(d) >= new Date(state.startDate) && state.log[key] === undefined) {
       state.log[key] = { missed: true };
     }
-    d.setDate(d.getDate() - 1);
+    d.setDate(d.getDate()-1);
   }
 }
 
-// ── TIMER ───────────────────────────────────────────────────
+// ── WAKE LOCK ────────────────────────────────────────────────
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+}
+function releaseWakeLock() {
+  if (wakeLock) { wakeLock.release(); wakeLock = null; }
+}
+
+// ── TIMER ────────────────────────────────────────────────────
 let timerInterval = null, timerSeconds = 0, timerRunning = false;
 const TARGET = 120;
 
@@ -291,244 +279,238 @@ function formatTime(s) { return Math.floor(s/60) + ':' + String(s%60).padStart(2
 function startTimer() {
   if (timerRunning) return;
   timerRunning = true;
+  requestWakeLock();
   document.getElementById('btn-start').style.display = 'none';
   document.getElementById('btn-stop').style.display = 'block';
   document.getElementById('timer-display').className = 'timer-display mono running';
   document.getElementById('timer-label-text').textContent = 'COLGANDO...';
+  document.getElementById('timer-message').textContent = '';
   timerInterval = setInterval(() => {
     timerSeconds++;
     updateTimerDisplay();
-    if (timerSeconds >= TARGET) { stopTimer(); showNotif('🎯 ¡2 minutos! Objetivo alcanzado'); }
+    const msg = MESSAGES.find(m => m.sec === timerSeconds);
+    if (msg) {
+      document.getElementById('timer-message').textContent = msg.msg;
+      if (timerSeconds >= TARGET) { stopTimer(); return; }
+    }
   }, 1000);
 }
 
 function stopTimer() {
   clearInterval(timerInterval); timerRunning = false;
+  releaseWakeLock();
   document.getElementById('btn-start').style.display = 'block';
   document.getElementById('btn-stop').style.display = 'none';
   document.getElementById('timer-display').className = 'timer-display mono stopped';
   document.getElementById('timer-label-text').textContent = 'PARADO — ' + formatTime(timerSeconds);
-  if (timerSeconds > state.bestHang) { state.bestHang = timerSeconds; saveState(state); updateBestDisplay(); }
-  if (timerSeconds >= 10) markExercise('hang');
+
+  if (timerSeconds > state.bestHang) { state.bestHang = timerSeconds; }
+  const todayKey = today();
+  const prev = state.hangLog[todayKey] || 0;
+  if (timerSeconds > prev) { state.hangLog[todayKey] = timerSeconds; }
+  saveState(state);
+  updateTimerInfo();
+
+  if (timerSeconds >= 10) {
+    setSeries('hang', 1);
+  }
 }
 
 function resetTimer() {
   clearInterval(timerInterval); timerRunning = false; timerSeconds = 0;
+  releaseWakeLock();
   document.getElementById('btn-start').style.display = 'block';
   document.getElementById('btn-stop').style.display = 'none';
   document.getElementById('timer-display').className = 'timer-display mono';
   document.getElementById('timer-label-text').textContent = 'LISTO PARA COLGAR';
+  document.getElementById('timer-message').textContent = '';
   updateTimerDisplay();
 }
 
 function updateTimerDisplay() {
   document.getElementById('timer-display').textContent = formatTime(timerSeconds);
-  document.getElementById('timer-progress').style.width = Math.min(100, (timerSeconds/TARGET)*100) + '%';
+  document.getElementById('timer-progress').style.width = Math.min(100,(timerSeconds/TARGET)*100) + '%';
 }
 
-function updateBestDisplay() {
+function updateTimerInfo() {
+  const todayKey = today();
+  document.getElementById('today-hang-display').textContent = state.hangLog[todayKey] ? formatTime(state.hangLog[todayKey]) : '—';
   document.getElementById('best-time-display').textContent = state.bestHang > 0 ? formatTime(state.bestHang) : '—';
+
+  const hist = document.getElementById('hang-history');
+  hist.innerHTML = '';
+  const keys = Object.keys(state.hangLog).sort().slice(-7);
+  keys.forEach(k => {
+    const v = state.hangLog[k];
+    const dot = document.createElement('div');
+    dot.className = 'hang-dot' + (v === state.bestHang ? ' best' : '');
+    const d = new Date(k); dot.textContent = (d.getDate()) + '/' + (d.getMonth()+1) + ' ' + formatTime(v);
+    hist.appendChild(dot);
+  });
 }
 
-// ── EXERCISES ───────────────────────────────────────────────
-let checkedToday = {};
-let currentExercises = [];
+// ── SERIES SELECTOR ──────────────────────────────────────────
+let seriesData = {};
+
+function getExercises(phase) {
+  return [
+    { id:'hang',     name:'Dead hang',       detail:'1 serie · objetivo 2:00', icon:'🧗', maxSeries:1 },
+    { id:'flex',     name:'Flexiones',       detail:phase.flex,                icon:'💪', maxSeries:3 },
+    { id:'squat',    name:'Sentadillas',     detail:phase.squat,               icon:'🏋️', maxSeries:3 },
+    { id:'rotation', name:'Rotación hombro', detail:phase.rotation,            icon:'🔄', maxSeries:3 },
+  ];
+}
+
+function setSeries(id, n) {
+  const todayKey = today();
+  if (!state.log[todayKey]) state.log[todayKey] = { series: {} };
+  if (!state.log[todayKey].series) state.log[todayKey].series = {};
+  state.log[todayKey].series[id] = n;
+  seriesData[id] = n;
+  saveState(state);
+  updateSeriesUI(id, n);
+  updateConfirmButton();
+}
+
+function updateSeriesUI(id, n) {
+  const card = document.getElementById('card-' + id);
+  if (!card) return;
+  if (n > 0) card.classList.add('done'); else card.classList.remove('done');
+  const btns = card.querySelectorAll('.series-btn');
+  btns.forEach((btn, i) => {
+    btn.classList.toggle('selected', i+1 === n);
+  });
+}
 
 function renderExercises() {
   const todayKey = today();
-  checkedToday = (state.log[todayKey] && state.log[todayKey].exercises) || {};
+  seriesData = (state.log[todayKey] && state.log[todayKey].series) || {};
   const phase = getCurrentPhase();
-  currentExercises = getExercises(phase);
+  const exercises = getExercises(phase);
   const list = document.getElementById('exercise-list');
   list.innerHTML = '';
-  currentExercises.forEach(ex => {
-    const done = !!checkedToday[ex.id];
+
+  exercises.forEach(ex => {
+    const n = seriesData[ex.id] || 0;
     const card = document.createElement('div');
-    card.className = 'exercise-card' + (done ? ' done' : '');
+    card.className = 'exercise-card' + (n > 0 ? ' done' : '');
     card.id = 'card-' + ex.id;
-    card.onclick = () => toggleExercise(ex.id);
-    card.innerHTML = `<div class="ex-icon">${ex.icon}</div><div class="ex-info"><div class="ex-name">${ex.name}</div><div class="ex-detail mono">${ex.detail}</div></div><div class="ex-check" id="check-${ex.id}"></div>`;
+
+    const maxS = ex.maxSeries;
+    let btns = '';
+    for (let i = 1; i <= maxS; i++) {
+      btns += `<button class="series-btn${n===i?' selected':''}" onclick="setSeries('${ex.id}',${i})">${i} serie${i>1?'s':''}</button>`;
+    }
+
+    card.innerHTML = `
+      <div class="ex-top">
+        <div class="ex-icon">${ex.icon}</div>
+        <div class="ex-info">
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-detail mono">${ex.detail}</div>
+        </div>
+      </div>
+      <div class="series-selector">${btns}</div>
+    `;
     list.appendChild(card);
   });
   updateConfirmButton();
 }
 
-function markExercise(id) {
-  const todayKey = today();
-  if (!state.log[todayKey]) state.log[todayKey] = { exercises: {} };
-  if (!state.log[todayKey].exercises) state.log[todayKey].exercises = {};
-  state.log[todayKey].exercises[id] = true;
-  checkedToday[id] = true;
-  saveState(state);
-  const card = document.getElementById('card-' + id);
-  if (card) card.classList.add('done');
-  updateConfirmButton();
-}
-
-function toggleExercise(id) {
-  if (id === 'hang') return;
-  const todayKey = today();
-  if (!state.log[todayKey]) state.log[todayKey] = { exercises: {} };
-  if (!state.log[todayKey].exercises) state.log[todayKey].exercises = {};
-  const current = state.log[todayKey].exercises[id];
-  state.log[todayKey].exercises[id] = !current;
-  checkedToday[id] = !current;
-  saveState(state);
-  const card = document.getElementById('card-' + id);
-  if (card) card.classList.toggle('done', !current);
-  updateConfirmButton();
-}
-
 function updateConfirmButton() {
-  const allDone = currentExercises.every(ex => checkedToday[ex.id]);
-  const btn = document.getElementById('btn-confirm');
-  const hint = document.getElementById('confirm-hint');
   const todayKey = today();
   const alreadyConfirmed = state.log[todayKey] && state.log[todayKey].confirmed;
+  const btn = document.getElementById('btn-confirm');
+  const hint = document.getElementById('confirm-hint');
+
   if (alreadyConfirmed) {
-    btn.disabled = true; btn.textContent = '✓ Completado'; hint.textContent = '';
-  } else if (allDone) {
+    btn.disabled = true; btn.textContent = '✓ Completado'; hint.textContent = ''; return;
+  }
+
+  const phase = getCurrentPhase();
+  const exercises = getExercises(phase);
+  const pending = exercises.filter(ex => !seriesData[ex.id]).length;
+
+  if (pending === 0) {
     btn.disabled = false; hint.textContent = '¡Todo listo!';
   } else {
     btn.disabled = true;
-    const pending = currentExercises.filter(ex => !checkedToday[ex.id]).length;
-    hint.textContent = `Faltan ${pending} ejercicio${pending > 1 ? 's' : ''}`;
+    hint.textContent = `Faltan ${pending} ejercicio${pending>1?'s':''}`;
   }
 }
 
-// ── CONFIRM ─────────────────────────────────────────────────
+// ── CONFIRM ──────────────────────────────────────────────────
 function confirmWorkout() {
   const todayKey = today();
-  if (!state.log[todayKey]) state.log[todayKey] = { exercises: {} };
+  if (!state.log[todayKey]) state.log[todayKey] = { series: {} };
   state.log[todayKey].confirmed = true;
-  state.log[todayKey].time = localNow().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  state.log[todayKey].time = localNow().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
   if (!state.startDate) state.startDate = todayKey;
-  state.streak = calculateStreak();
+  const streak = calculateStreak();
   saveState(state);
-  document.getElementById('cel-streak-text').textContent = 'Racha: ' + state.streak + ' día' + (state.streak !== 1 ? 's' : '');
-  document.getElementById('streak-display').textContent = state.streak;
+  document.getElementById('cel-streak-text').textContent = 'Racha: ' + streak + ' día' + (streak!==1?'s':'');
+  document.getElementById('streak-display').textContent = streak;
   document.getElementById('celebration').classList.add('show');
   showDoneToday();
   renderHistory();
+  renderPhase();
 }
 
 function closeCelebration() { document.getElementById('celebration').classList.remove('show'); }
 
 function showDoneToday() {
-  const todayKey = today();
-  const entry = state.log[todayKey];
+  const entry = state.log[today()];
   if (entry && entry.confirmed) {
     document.getElementById('done-banner').style.display = 'block';
-    document.getElementById('done-time-text').textContent = 'Completado a las ' + (entry.time || '—');
+    document.getElementById('done-time-text').textContent = 'Completado a las ' + (entry.time||'—');
     document.getElementById('btn-confirm').disabled = true;
     document.getElementById('btn-confirm').textContent = '✓ Completado';
     document.getElementById('confirm-hint').textContent = '';
   }
 }
 
-// ── FASE UI ──────────────────────────────────────────────────
+// ── PHASE UI ─────────────────────────────────────────────────
 function renderPhase() {
   const week = getWeekNumber();
   const phase = getCurrentPhase();
   const phaseIdx = PHASES.indexOf(phase);
-  const nextPhase = PHASES[phaseIdx + 1];
-  const weeksInPhase = phase.weeks.length;
+  const nextPhase = PHASES[phaseIdx+1];
   const weekInPhase = phase.weeks.indexOf(week) + 1;
-  const pct = Math.round((weekInPhase / weeksInPhase) * 100);
-
+  const pct = Math.round((weekInPhase / phase.weeks.length) * 100);
   document.getElementById('phase-title').textContent = `Semana ${week} — ${phase.label}`;
   document.getElementById('phase-desc').textContent = phase.desc;
   document.getElementById('phase-bar').style.width = pct + '%';
   if (nextPhase) {
-    const weeksLeft = phase.weeks[phase.weeks.length - 1] - week;
+    const weeksLeft = phase.weeks[phase.weeks.length-1] - week;
     document.getElementById('phase-next').textContent = weeksLeft > 0
-      ? `Próxima fase en ${weeksLeft} semana${weeksLeft > 1 ? 's' : ''}: ${nextPhase.label}`
+      ? `Próxima fase en ${weeksLeft} semana${weeksLeft>1?'s':''}`
       : 'Próxima semana cambias de fase';
   } else {
     document.getElementById('phase-next').textContent = '¡Fase avanzada alcanzada!';
   }
 }
 
-// ── ALARM ───────────────────────────────────────────────────
+// ── ALARM ────────────────────────────────────────────────────
 function saveAlarm() {
   const val = document.getElementById('alarm-input').value;
   if (!val) return;
   state.alarmTime = val;
   saveState(state);
   document.getElementById('alarm-display').textContent = val;
-  scheduleNotification();
   showNotif('Alarma guardada para las ' + val);
 }
-
 function toggleAlarm() {
   state.alarmOn = document.getElementById('alarm-toggle').checked;
   saveState(state);
   document.getElementById('alarm-status-text').textContent = state.alarmOn ? 'Activa' : 'Desactivada';
 }
-
-// ── NOTIFICACIONES PUSH ──────────────────────────────────────
-async function requestNotifPermission() {
-  if (!('Notification' in window)) {
-    showNotif('Este navegador no soporta notificaciones');
-    return;
-  }
-  const permission = await Notification.requestPermission();
-  updateNotifButton(permission);
-  if (permission === 'granted') {
-    showNotif('✓ Notificaciones activadas');
-    scheduleNotification();
-  } else {
-    showNotif('Permiso denegado — usa la alarma del móvil');
-  }
-}
-
-function updateNotifButton(permission) {
-  const btn = document.getElementById('notif-perm-btn');
-  if (permission === 'granted') {
-    btn.textContent = '✓ Notificaciones activadas';
-    btn.classList.add('granted');
-    btn.onclick = null;
-  } else if (permission === 'denied') {
-    btn.textContent = 'Notificaciones bloqueadas en ajustes';
-    btn.classList.add('granted');
-    btn.onclick = null;
-  }
-}
-
-function scheduleNotification() {
-  if (Notification.permission !== 'granted' || !state.alarmOn) return;
-  const [h, m] = state.alarmTime.split(':').map(Number);
-  const now = localNow();
-  const target = new Date(now);
-  target.setHours(h, m, 0, 0);
-  if (target <= now) target.setDate(target.getDate() + 1);
-  const ms = target - now;
-  if (ms > 0 && ms < 86400000) {
-    clearTimeout(window._notifTimeout);
-    window._notifTimeout = setTimeout(() => {
-      const todayKey = today();
-      const dow = localNow().getDay();
-      if (dow !== 0 && dow !== 6 && state.alarmOn && !(state.log[todayKey] && state.log[todayKey].confirmed)) {
-        new Notification('💪 Rutina mañana', {
-          body: '¡Son las ' + state.alarmTime + '! Hora de colgar de la barra.',
-          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💪</text></svg>',
-          tag: 'rutina-diaria',
-          renotify: true
-        });
-        setTimeout(scheduleNotification, 60000);
-      }
-    }, ms);
-  }
-}
-
 let alarmFired = false;
 function checkAlarm() {
   if (!state.alarmOn || alarmFired) return;
   const now = localNow();
   const hhmm = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
   if (hhmm === state.alarmTime && !isWeekend(now)) {
-    const todayKey = today();
-    if (!state.log[todayKey] || !state.log[todayKey].confirmed) {
+    if (!state.log[today()] || !state.log[today()].confirmed) {
       showNotif('⏰ ' + state.alarmTime + ' — ¡Hora de la rutina!');
       alarmFired = true;
       setTimeout(() => { alarmFired = false; }, 70000);
@@ -536,13 +518,12 @@ function checkAlarm() {
   }
 }
 
-// ── HISTORY ─────────────────────────────────────────────────
+// ── HISTORY ──────────────────────────────────────────────────
 function renderHistory() {
   const grid = document.getElementById('history-grid');
   grid.innerHTML = '';
   const todayKey = today();
-  const d = new Date();
-  d.setDate(d.getDate() - 27);
+  const d = new Date(); d.setDate(d.getDate()-27);
   for (let i = 0; i < 28; i++) {
     const key = toDateKey(d);
     const weekend = isWeekend(d);
@@ -550,16 +531,22 @@ function renderHistory() {
     const entry = state.log[key];
     const confirmed = entry && entry.confirmed;
     const missed = entry && entry.missed;
-    const dayEl = document.createElement('div');
+    const series = confirmed && entry.series ? Object.values(entry.series).reduce((a,b)=>a+b,0) : 0;
+    const hang = state.hangLog[key];
+
+    const el = document.createElement('div');
     let cls = 'history-day';
     if (weekend) cls += ' rest';
     else if (confirmed) cls += ' completed';
     else if (missed) cls += ' missed';
     else if (isToday) cls += ' today';
-    dayEl.className = cls;
-    dayEl.innerHTML = `<span style="font-size:9px">${d.getDate()}</span><div class="hd-dot"></div>`;
-    grid.appendChild(dayEl);
-    d.setDate(d.getDate() + 1);
+    el.className = cls;
+
+    let inner = `<span style="font-size:9px">${d.getDate()}</span><div class="hd-dot"></div>`;
+    if (confirmed && hang) inner += `<span class="hd-series">${formatTime(hang)}</span>`;
+    el.innerHTML = inner;
+    grid.appendChild(el);
+    d.setDate(d.getDate()+1);
   }
 }
 
@@ -581,8 +568,7 @@ function updateHeader() {
 
 function showNotif(msg) {
   const el = document.getElementById('notif-banner');
-  el.textContent = msg;
-  el.classList.add('show');
+  el.textContent = msg; el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 3500);
 }
 
@@ -596,15 +582,11 @@ function init() {
   document.getElementById('alarm-input').value = state.alarmTime;
   document.getElementById('alarm-toggle').checked = state.alarmOn;
   document.getElementById('alarm-status-text').textContent = state.alarmOn ? 'Activa' : 'Desactivada';
-  updateBestDisplay();
+  updateTimerInfo();
   renderExercises();
   showDoneToday();
   renderHistory();
   setInterval(checkAlarm, 15000);
-  if ('Notification' in window) {
-    updateNotifButton(Notification.permission);
-    if (Notification.permission === 'granted') scheduleNotification();
-  }
 }
 
 init();
