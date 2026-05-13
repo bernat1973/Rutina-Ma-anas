@@ -110,6 +110,16 @@
   .rep-btn:active { background: var(--border); }
   .rep-num { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent); min-width: 36px; text-align: center; }
   .rep-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .series-hint { font-size: 11px; color: var(--warn); font-family: 'DM Mono', monospace; margin-top: 6px; text-align: center; }
+  /* ── PLANK TIMER ─────────────────────────────────────────── */
+  .plank-wrap { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .plank-display { font-family: 'DM Mono', monospace; font-size: 36px; font-weight: 300; text-align: center; color: var(--text); margin: 6px 0; }
+  .plank-display.running { color: var(--accent); }
+  .plank-display.stopped { color: var(--warn); }
+  .plank-info { text-align: center; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+  .plank-btns { display: flex; gap: 8px; }
+  .btn-plank { flex: 1; padding: 10px 4px; border-radius: 10px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .btn-plank:active { transform: scale(0.97); }
   /* ── PROGRESS CHART ──────────────────────────────────────── */
   .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
   .chart-suggest { font-size: 11px; color: var(--accent2); font-family: 'DM Mono', monospace; margin-top: 12px; text-align: center; line-height: 1.8; }
@@ -166,7 +176,8 @@
     <button class="btn-small" style="width:100%;padding:10px;font-size:13px;color:var(--accent2);border-color:var(--accent2)" onclick="confirmYesterday()">¿Hiciste la rutina ayer y no la registraste? Marcar ayer</button>
   </div>
 
-  <div class="phase-card" id="phase-card">
+  <!-- Tarjeta de fase oculta — progresión manual a tu ritmo -->
+  <div class="phase-card" id="phase-card" style="display:none">
     <div class="phase-title" id="phase-title">Semana 1 — fase inicial</div>
     <div id="phase-desc" style="font-size:13px;color:var(--text)">Consolida el hábito</div>
     <div class="phase-next" id="phase-next"></div>
@@ -234,12 +245,15 @@ function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)
 function saveState(s) { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
 
 let state = loadState();
-if (!state.log)       state.log = {};
-if (!state.bestHang)  state.bestHang = 0;
-if (!state.alarmTime) state.alarmTime = '08:00';
-if (!state.alarmOn)   state.alarmOn = true;
-if (!state.startDate) state.startDate = null;
-if (!state.hangLog)   state.hangLog = {};
+if (!state.log)            state.log = {};
+if (!state.bestHang)       state.bestHang = 0;
+if (!state.alarmTime)      state.alarmTime = '08:00';
+if (!state.alarmOn)        state.alarmOn = true;
+if (!state.startDate)      state.startDate = null;
+if (!state.hangLog)        state.hangLog = {};
+if (!state.plankLog)       state.plankLog = {};
+if (!state.bestPlank)      state.bestPlank = 0;
+if (!state.plankStartDate) state.plankStartDate = null;
 
 function localNow() { return new Date(new Date().toLocaleString('en-US', { timeZone: 'Europe/Madrid' })); }
 function toDateKey(d) { return new Date(d).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }); }
@@ -252,6 +266,16 @@ function getWeekNumber() {
   return Math.min(Math.floor(diff / 7) + 1, 12);
 }
 function getCurrentPhase() { const w = getWeekNumber(); return PHASES.find(p => p.weeks.includes(w)) || PHASES[PHASES.length-1]; }
+
+// Objetivo plancha progresivo: +15s cada 2 semanas desde que empezó
+function getPlankTarget() {
+  if (!state.plankStartDate) return 30;
+  const weeks = Math.floor((new Date() - new Date(state.plankStartDate)) / (7 * 86400000));
+  if (weeks < 2) return 30;
+  if (weeks < 4) return 45;
+  if (weeks < 6) return 60;
+  return 90;
+}
 
 function calculateStreak() {
   let streak = 0;
@@ -282,17 +306,11 @@ function checkMissedDays() {
 // ── WAKE LOCK ────────────────────────────────────────────────
 let wakeLock = null;
 async function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
-  } catch(e) {}
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
 }
-function releaseWakeLock() {
-  if (wakeLock) { wakeLock.release(); wakeLock = null; }
-}
+function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
 
-// ── TIMER ────────────────────────────────────────────────────
+// ── DEAD HANG TIMER ──────────────────────────────────────────
 let timerInterval = null, timerSeconds = 0, timerRunning = false;
 const TARGET = 120;
 
@@ -325,17 +343,13 @@ function stopTimer() {
   document.getElementById('btn-stop').style.display = 'none';
   document.getElementById('timer-display').className = 'timer-display mono stopped';
   document.getElementById('timer-label-text').textContent = 'PARADO — ' + formatTime(timerSeconds);
-
-  if (timerSeconds > state.bestHang) { state.bestHang = timerSeconds; }
+  if (timerSeconds > state.bestHang) state.bestHang = timerSeconds;
   const todayKey = today();
   const prev = state.hangLog[todayKey] || 0;
-  if (timerSeconds > prev) { state.hangLog[todayKey] = timerSeconds; }
+  if (timerSeconds > prev) state.hangLog[todayKey] = timerSeconds;
   saveState(state);
   updateTimerInfo();
-
-  if (timerSeconds >= 10) {
-    setSeries('hang', 1);
-  }
+  if (timerSeconds >= 10) setSeries('hang', 1);
 }
 
 function resetTimer() {
@@ -358,7 +372,6 @@ function updateTimerInfo() {
   const todayKey = today();
   document.getElementById('today-hang-display').textContent = state.hangLog[todayKey] ? formatTime(state.hangLog[todayKey]) : '—';
   document.getElementById('best-time-display').textContent = state.bestHang > 0 ? formatTime(state.bestHang) : '—';
-
   const hist = document.getElementById('hang-history');
   hist.innerHTML = '';
   const keys = Object.keys(state.hangLog).sort().slice(-7);
@@ -371,15 +384,82 @@ function updateTimerInfo() {
   });
 }
 
+// ── PLANK TIMER ──────────────────────────────────────────────
+let plankInterval = null, plankSeconds = 0, plankRunning = false;
+
+function startPlankTimer() {
+  if (plankRunning) return;
+  plankRunning = true;
+  requestWakeLock();
+  document.getElementById('plank-btn-start').style.display = 'none';
+  document.getElementById('plank-btn-stop').style.display = 'block';
+  document.getElementById('plank-display').className = 'plank-display running';
+  plankInterval = setInterval(() => {
+    plankSeconds++;
+    updatePlankDisplay();
+    const target = getPlankTarget();
+    if (plankSeconds >= target) { stopPlankTimer(); }
+  }, 1000);
+}
+
+function stopPlankTimer() {
+  clearInterval(plankInterval); plankRunning = false;
+  releaseWakeLock();
+  const startBtn = document.getElementById('plank-btn-start');
+  const stopBtn = document.getElementById('plank-btn-stop');
+  if (startBtn) startBtn.style.display = 'block';
+  if (stopBtn) stopBtn.style.display = 'none';
+  const disp = document.getElementById('plank-display');
+  if (disp) disp.className = 'plank-display stopped';
+  if (plankSeconds > state.bestPlank) state.bestPlank = plankSeconds;
+  const todayKey = today();
+  const prev = state.plankLog[todayKey] || 0;
+  if (plankSeconds > prev) state.plankLog[todayKey] = plankSeconds;
+  if (!state.plankStartDate) state.plankStartDate = todayKey;
+  saveState(state);
+  updatePlankInfo();
+  if (plankSeconds >= 10) setSeries('plank', 1);
+}
+
+function resetPlankTimer() {
+  clearInterval(plankInterval); plankRunning = false; plankSeconds = 0;
+  releaseWakeLock();
+  const startBtn = document.getElementById('plank-btn-start');
+  const stopBtn = document.getElementById('plank-btn-stop');
+  if (startBtn) startBtn.style.display = 'block';
+  if (stopBtn) stopBtn.style.display = 'none';
+  const disp = document.getElementById('plank-display');
+  if (disp) { disp.className = 'plank-display'; disp.textContent = '0:00'; }
+  updatePlankDisplay();
+}
+
+function updatePlankDisplay() {
+  const disp = document.getElementById('plank-display');
+  const bar = document.getElementById('plank-bar');
+  if (disp) disp.textContent = formatTime(plankSeconds);
+  if (bar) bar.style.width = Math.min(100,(plankSeconds/getPlankTarget())*100) + '%';
+}
+
+function updatePlankInfo() {
+  const todayKey = today();
+  const todayEl = document.getElementById('today-plank');
+  const bestEl = document.getElementById('best-plank');
+  const targetEl = document.getElementById('plank-target-display');
+  if (todayEl) todayEl.textContent = state.plankLog[todayKey] ? formatTime(state.plankLog[todayKey]) : '—';
+  if (bestEl) bestEl.textContent = state.bestPlank > 0 ? formatTime(state.bestPlank) : '—';
+  if (targetEl) targetEl.textContent = formatTime(getPlankTarget());
+}
+
 // ── SERIES SELECTOR ──────────────────────────────────────────
 let seriesData = {};
 
 function getExercises(phase) {
   return [
-    { id:'hang',     name:'Dead hang',       detail:'1 serie · objetivo 2:00', icon:'🧗', maxSeries:1 },
-    { id:'flex',     name:'Flexiones',       detail:phase.flex,                icon:'💪', maxSeries:3 },
-    { id:'squat',    name:'Sentadillas',     detail:phase.squat,               icon:'🏋️', maxSeries:3 },
-    { id:'rotation', name:'Rotación hombro', detail:phase.rotation,            icon:'🔄', maxSeries:3 },
+    { id:'hang',     name:'Dead hang',       detail:'1 serie · objetivo 2:00',      icon:'🧗', maxSeries:1 },
+    { id:'flex',     name:'Flexiones',       detail:phase.flex,                     icon:'💪', maxSeries:3 },
+    { id:'squat',    name:'Sentadillas',     detail:phase.squat,                    icon:'🏋️', maxSeries:3 },
+    { id:'rotation', name:'Rotación hombro', detail:phase.rotation,                 icon:'🔄', maxSeries:3 },
+    { id:'plank',    name:'Plancha core',    detail:'cronómetro · objetivo ' + formatTime(getPlankTarget()), icon:'🧘', maxSeries:1, timed:true },
   ];
 }
 
@@ -399,17 +479,15 @@ function updateSeriesUI(id, n) {
   if (!card) return;
   if (n > 0) card.classList.add('done'); else card.classList.remove('done');
   const btns = card.querySelectorAll('.series-btn');
-  btns.forEach((btn, i) => {
-    btn.classList.toggle('selected', i+1 === n);
-  });
+  btns.forEach((btn, i) => { btn.classList.toggle('selected', i+1 === n); });
 }
 
 // ── REP TRACKING ─────────────────────────────────────────────
 const DEFAULT_REPS = { flex: 15, squat: 20, rotation: 15 };
+const SERIES_THRESHOLDS = { flex: 20, squat: 28, rotation: 20 };
 
 function getTodayReps(id) {
-  const todayKey = today();
-  const entry = state.log[todayKey];
+  const entry = state.log[today()];
   if (entry && entry.reps && entry.reps[id]) return entry.reps[id];
   return DEFAULT_REPS[id] || 10;
 }
@@ -418,13 +496,22 @@ function adjustReps(id, delta) {
   const todayKey = today();
   if (!state.log[todayKey]) state.log[todayKey] = { series: {}, reps: {} };
   if (!state.log[todayKey].reps) state.log[todayKey].reps = {};
-  const current = getTodayReps(id);
-  const newVal = Math.max(1, current + delta);
+  const newVal = Math.max(1, getTodayReps(id) + delta);
   state.log[todayKey].reps[id] = newVal;
   saveState(state);
   const el = document.getElementById('rep-num-' + id);
   if (el) el.textContent = newVal;
+  // Actualizar hint de series
+  const hintEl = document.getElementById('series-hint-' + id);
+  if (hintEl) hintEl.textContent = getSeriesHint(id, newVal);
   renderProgressChart();
+}
+
+function getSeriesHint(id, currentReps) {
+  const threshold = SERIES_THRESHOLDS[id];
+  if (!threshold) return '';
+  if (currentReps >= threshold) return `¡${currentReps} reps! Considera pasar a 2 series`;
+  return `A ${threshold - currentReps} reps de considerar 2 series`;
 }
 
 function renderExercises() {
@@ -447,13 +534,34 @@ function renderExercises() {
       btns += `<button class="series-btn${n===i?' selected':''}" onclick="setSeries('${ex.id}',${i})">${i} serie${i>1?'s':''}</button>`;
     }
 
-    const repCounterHTML = ex.id !== 'hang' ? `
-      <div class="rep-counter">
-        <button class="rep-btn" onclick="adjustReps('${ex.id}', -1)">−</button>
-        <span class="rep-num" id="rep-num-${ex.id}">${getTodayReps(ex.id)}</span>
-        <button class="rep-btn" onclick="adjustReps('${ex.id}', +1)">+</button>
-        <span class="rep-label">reps hoy</span>
-      </div>` : '';
+    let extraHTML = '';
+
+    if (ex.timed && ex.id === 'plank') {
+      // Cronómetro de plancha
+      extraHTML = `
+        <div class="plank-wrap">
+          <div class="plank-display" id="plank-display">0:00</div>
+          <div class="progress-wrap"><div class="progress-bar" id="plank-bar" style="width:0%"></div></div>
+          <div class="plank-info">Hoy: <span id="today-plank">—</span> &nbsp;·&nbsp; Mejor: <span id="best-plank">—</span> &nbsp;·&nbsp; Obj: <span id="plank-target-display" style="color:var(--warn)">${formatTime(getPlankTarget())}</span></div>
+          <div class="plank-btns">
+            <button class="btn-plank btn-start" id="plank-btn-start" onclick="startPlankTimer()">Iniciar</button>
+            <button class="btn-plank btn-stop" id="plank-btn-stop" onclick="stopPlankTimer()" style="display:none">Parar</button>
+            <button class="btn-plank btn-reset" onclick="resetPlankTimer()">Reset</button>
+          </div>
+        </div>`;
+    } else if (ex.id !== 'hang') {
+      // Contador de reps + hint de series
+      const reps = getTodayReps(ex.id);
+      const hint = getSeriesHint(ex.id, reps);
+      extraHTML = `
+        <div class="rep-counter">
+          <button class="rep-btn" onclick="adjustReps('${ex.id}', -1)">−</button>
+          <span class="rep-num" id="rep-num-${ex.id}">${reps}</span>
+          <button class="rep-btn" onclick="adjustReps('${ex.id}', +1)">+</button>
+          <span class="rep-label">reps hoy</span>
+        </div>
+        <div class="series-hint" id="series-hint-${ex.id}">${hint}</div>`;
+    }
 
     card.innerHTML = `
       <div class="ex-top">
@@ -464,10 +572,12 @@ function renderExercises() {
         </div>
       </div>
       <div class="series-selector">${btns}</div>
-      ${repCounterHTML}
+      ${extraHTML}
     `;
     list.appendChild(card);
   });
+
+  updatePlankInfo();
   updateConfirmButton();
 }
 
@@ -476,21 +586,12 @@ function updateConfirmButton() {
   const alreadyConfirmed = state.log[todayKey] && state.log[todayKey].confirmed;
   const btn = document.getElementById('btn-confirm');
   const hint = document.getElementById('confirm-hint');
-
-  if (alreadyConfirmed) {
-    btn.disabled = true; btn.textContent = '✓ Completado'; hint.textContent = ''; return;
-  }
-
+  if (alreadyConfirmed) { btn.disabled = true; btn.textContent = '✓ Completado'; hint.textContent = ''; return; }
   const phase = getCurrentPhase();
   const exercises = getExercises(phase);
   const pending = exercises.filter(ex => !seriesData[ex.id]).length;
-
-  if (pending === 0) {
-    btn.disabled = false; hint.textContent = '¡Todo listo!';
-  } else {
-    btn.disabled = true;
-    hint.textContent = `Faltan ${pending} ejercicio${pending>1?'s':''}`;
-  }
+  if (pending === 0) { btn.disabled = false; hint.textContent = '¡Todo listo!'; }
+  else { btn.disabled = true; hint.textContent = `Faltan ${pending} ejercicio${pending>1?'s':''}`; }
 }
 
 // ── CONFIRM ──────────────────────────────────────────────────
@@ -521,13 +622,12 @@ function showDoneToday() {
     document.getElementById('btn-confirm').disabled = true;
     document.getElementById('btn-confirm').textContent = '✓ Completado';
     document.getElementById('confirm-hint').textContent = '';
-  // Show yesterday button if yesterday not confirmed
-  const yd = new Date(); yd.setDate(yd.getDate()-1);
-  while(isWeekend(yd)) yd.setDate(yd.getDate()-1);
-  const yk = toDateKey(yd);
-  if (!state.log[yk] || !state.log[yk].confirmed) {
-    document.getElementById('yesterday-btn-wrap').style.display = 'block';
-  }
+    const yd = new Date(); yd.setDate(yd.getDate()-1);
+    while(isWeekend(yd)) yd.setDate(yd.getDate()-1);
+    const yk = toDateKey(yd);
+    if (!state.log[yk] || !state.log[yk].confirmed) {
+      document.getElementById('yesterday-btn-wrap').style.display = 'block';
+    }
   }
 }
 
@@ -544,9 +644,7 @@ function renderPhase() {
   document.getElementById('phase-bar').style.width = pct + '%';
   if (nextPhase) {
     const weeksLeft = phase.weeks[phase.weeks.length-1] - week;
-    document.getElementById('phase-next').textContent = weeksLeft > 0
-      ? `Próxima fase en ${weeksLeft} semana${weeksLeft>1?'s':''}`
-      : 'Próxima semana cambias de fase';
+    document.getElementById('phase-next').textContent = weeksLeft > 0 ? `Próxima fase en ${weeksLeft} semana${weeksLeft>1?'s':''}` : 'Próxima semana cambias de fase';
   } else {
     document.getElementById('phase-next').textContent = '¡Fase avanzada alcanzada!';
   }
@@ -556,14 +654,12 @@ function renderPhase() {
 function saveAlarm() {
   const val = document.getElementById('alarm-input').value;
   if (!val) return;
-  state.alarmTime = val;
-  saveState(state);
+  state.alarmTime = val; saveState(state);
   document.getElementById('alarm-display').textContent = val;
   showNotif('Alarma guardada para las ' + val);
 }
 function toggleAlarm() {
-  state.alarmOn = document.getElementById('alarm-toggle').checked;
-  saveState(state);
+  state.alarmOn = document.getElementById('alarm-toggle').checked; saveState(state);
   document.getElementById('alarm-status-text').textContent = state.alarmOn ? 'Activa' : 'Desactivada';
 }
 let alarmFired = false;
@@ -593,9 +689,7 @@ function renderHistory() {
     const entry = state.log[key];
     const confirmed = entry && entry.confirmed;
     const missed = entry && entry.missed;
-    const series = confirmed && entry.series ? Object.values(entry.series).reduce((a,b)=>a+b,0) : 0;
     const hang = state.hangLog[key];
-
     const el = document.createElement('div');
     let cls = 'history-day';
     if (weekend) cls += ' rest';
@@ -603,7 +697,6 @@ function renderHistory() {
     else if (missed) cls += ' missed';
     else if (isToday) cls += ' today';
     el.className = cls;
-
     let inner = `<span style="font-size:9px">${d.getDate()}</span><div class="hd-dot"></div>`;
     if (confirmed && hang) inner += `<span class="hd-series">${formatTime(hang)}</span>`;
     el.innerHTML = inner;
@@ -619,13 +712,10 @@ function getLastSessions(maxN) {
   const sessions = [];
   const base = new Date();
   for (let i = 89; i >= 0 && sessions.length < maxN; i--) {
-    const dd = new Date(base);
-    dd.setDate(base.getDate() - i);
+    const dd = new Date(base); dd.setDate(base.getDate() - i);
     const key = toDateKey(dd);
     const entry = state.log[key];
-    if (entry && entry.confirmed) {
-      sessions.push({ key, label: dd.getDate() + '/' + (dd.getMonth()+1), entry });
-    }
+    if (entry && entry.confirmed) sessions.push({ key, label: dd.getDate() + '/' + (dd.getMonth()+1), entry });
   }
   return sessions;
 }
@@ -641,28 +731,18 @@ function renderProgressChart() {
   const chartEmpty = document.getElementById('chart-empty');
   const chartCanvas = document.getElementById('progress-chart');
   const chartSuggest = document.getElementById('chart-suggest');
-
   const hasRepsData = sessions.some(s => s.entry.reps && Object.keys(s.entry.reps).length > 0);
-
   if (sessions.length < 2 || !hasRepsData) {
-    chartEmpty.style.display = 'block';
-    chartCanvas.style.display = 'none';
-    chartSuggest.style.display = 'none';
+    chartEmpty.style.display = 'block'; chartCanvas.style.display = 'none'; chartSuggest.style.display = 'none';
     if (progressChart) { progressChart.destroy(); progressChart = null; }
     return;
   }
-
-  chartEmpty.style.display = 'none';
-  chartCanvas.style.display = 'block';
-  chartSuggest.style.display = 'block';
-
+  chartEmpty.style.display = 'none'; chartCanvas.style.display = 'block'; chartSuggest.style.display = 'block';
   const labels = sessions.map(s => s.label);
   const flexData = sessions.map(s => (s.entry.reps && s.entry.reps.flex) || null);
   const squatData = sessions.map(s => (s.entry.reps && s.entry.reps.squat) || null);
   const rotData = sessions.map(s => (s.entry.reps && s.entry.reps.rotation) || null);
-
   if (progressChart) { progressChart.destroy(); progressChart = null; }
-
   const ctx = chartCanvas.getContext('2d');
   progressChart = new Chart(ctx, {
     type: 'line',
@@ -675,18 +755,14 @@ function renderProgressChart() {
       ]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { labels: { color: '#6b6960', font: { family: 'DM Mono', size: 10 }, boxWidth: 10, padding: 10 } }
-      },
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { labels: { color: '#6b6960', font: { family: 'DM Mono', size: 10 }, boxWidth: 10, padding: 10 } } },
       scales: {
         x: { ticks: { color: '#6b6960', font: { family: 'DM Mono', size: 9 }, maxRotation: 0 }, grid: { color: '#2e2e2a' } },
         y: { beginAtZero: false, min: 1, ticks: { color: '#6b6960', font: { family: 'DM Mono', size: 9 }, stepSize: 1 }, grid: { color: '#2e2e2a' } }
       }
     }
   });
-
   const sugFlex = getSuggestedReps('flex', sessions);
   const sugSquat = getSuggestedReps('squat', sessions);
   const sugRot = getSuggestedReps('rotation', sessions);
@@ -716,13 +792,12 @@ function showNotif(msg) {
 }
 
 // ── INIT ─────────────────────────────────────────────────────
-
 function confirmYesterday() {
   const d = new Date(); d.setDate(d.getDate()-1);
   while (isWeekend(d)) d.setDate(d.getDate()-1);
   const key = toDateKey(d);
   if (state.log[key] && state.log[key].confirmed) { showNotif("Ayer ya estaba marcado"); return; }
-  state.log[key] = { confirmed:true, time:"—", series:{hang:1,flex:1,squat:1,rotation:1}, retroactive:true };
+  state.log[key] = { confirmed:true, time:"—", series:{hang:1,flex:1,squat:1,rotation:1,plank:1}, retroactive:true };
   if (!state.startDate) state.startDate = key;
   const streak = calculateStreak();
   saveState(state);
