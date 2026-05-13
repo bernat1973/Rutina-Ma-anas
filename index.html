@@ -9,6 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rutina">
 <title>Rutina Mañana</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
   :root {
@@ -103,6 +104,16 @@
   .done-today-banner .big { font-size: 40px; margin-bottom: 8px; }
   .done-today-banner .msg { font-size: 16px; font-weight: 500; color: var(--accent); }
   .done-today-banner .sub { font-size: 13px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+  /* ── REP COUNTER ─────────────────────────────────────────── */
+  .rep-counter { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .rep-btn { width: 30px; height: 30px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; line-height: 1; }
+  .rep-btn:active { background: var(--border); }
+  .rep-num { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent); min-width: 36px; text-align: center; }
+  .rep-label { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  /* ── PROGRESS CHART ──────────────────────────────────────── */
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
+  .chart-suggest { font-size: 11px; color: var(--accent2); font-family: 'DM Mono', monospace; margin-top: 12px; text-align: center; line-height: 1.8; }
+  .chart-empty { text-align: center; color: var(--muted); font-size: 12px; font-family: 'DM Mono', monospace; padding: 24px 0; }
 </style>
 </head>
 <body>
@@ -190,6 +201,13 @@
 
 <div class="section-title" style="margin-top:8px">Últimas 4 semanas</div>
 <div class="history-grid" id="history-grid"></div>
+
+<div class="section-title" style="margin-top:8px">Progresión de repeticiones</div>
+<div class="chart-card">
+  <div class="chart-empty" id="chart-empty">Completa varias sesiones registrando tus reps para ver la gráfica</div>
+  <canvas id="progress-chart" style="display:none"></canvas>
+  <div class="chart-suggest" id="chart-suggest" style="display:none"></div>
+</div>
 
 <script>
 const STORAGE_KEY = 'rutina_v4';
@@ -386,6 +404,29 @@ function updateSeriesUI(id, n) {
   });
 }
 
+// ── REP TRACKING ─────────────────────────────────────────────
+const DEFAULT_REPS = { flex: 15, squat: 20, rotation: 15 };
+
+function getTodayReps(id) {
+  const todayKey = today();
+  const entry = state.log[todayKey];
+  if (entry && entry.reps && entry.reps[id]) return entry.reps[id];
+  return DEFAULT_REPS[id] || 10;
+}
+
+function adjustReps(id, delta) {
+  const todayKey = today();
+  if (!state.log[todayKey]) state.log[todayKey] = { series: {}, reps: {} };
+  if (!state.log[todayKey].reps) state.log[todayKey].reps = {};
+  const current = getTodayReps(id);
+  const newVal = Math.max(1, current + delta);
+  state.log[todayKey].reps[id] = newVal;
+  saveState(state);
+  const el = document.getElementById('rep-num-' + id);
+  if (el) el.textContent = newVal;
+  renderProgressChart();
+}
+
 function renderExercises() {
   const todayKey = today();
   seriesData = (state.log[todayKey] && state.log[todayKey].series) || {};
@@ -406,6 +447,14 @@ function renderExercises() {
       btns += `<button class="series-btn${n===i?' selected':''}" onclick="setSeries('${ex.id}',${i})">${i} serie${i>1?'s':''}</button>`;
     }
 
+    const repCounterHTML = ex.id !== 'hang' ? `
+      <div class="rep-counter">
+        <button class="rep-btn" onclick="adjustReps('${ex.id}', -1)">−</button>
+        <span class="rep-num" id="rep-num-${ex.id}">${getTodayReps(ex.id)}</span>
+        <button class="rep-btn" onclick="adjustReps('${ex.id}', +1)">+</button>
+        <span class="rep-label">reps hoy</span>
+      </div>` : '';
+
     card.innerHTML = `
       <div class="ex-top">
         <div class="ex-icon">${ex.icon}</div>
@@ -415,6 +464,7 @@ function renderExercises() {
         </div>
       </div>
       <div class="series-selector">${btns}</div>
+      ${repCounterHTML}
     `;
     list.appendChild(card);
   });
@@ -458,6 +508,7 @@ function confirmWorkout() {
   showDoneToday();
   renderHistory();
   renderPhase();
+  renderProgressChart();
 }
 
 function closeCelebration() { document.getElementById('celebration').classList.remove('show'); }
@@ -561,6 +612,87 @@ function renderHistory() {
   }
 }
 
+// ── PROGRESS CHART ───────────────────────────────────────────
+let progressChart = null;
+
+function getLastSessions(maxN) {
+  const sessions = [];
+  const base = new Date();
+  for (let i = 89; i >= 0 && sessions.length < maxN; i--) {
+    const dd = new Date(base);
+    dd.setDate(base.getDate() - i);
+    const key = toDateKey(dd);
+    const entry = state.log[key];
+    if (entry && entry.confirmed) {
+      sessions.push({ key, label: dd.getDate() + '/' + (dd.getMonth()+1), entry });
+    }
+  }
+  return sessions;
+}
+
+function getSuggestedReps(id, sessions) {
+  const reps = sessions.map(s => s.entry.reps ? s.entry.reps[id] : null).filter(r => r !== null);
+  if (reps.length === 0) return DEFAULT_REPS[id] + 2;
+  return Math.max(...reps) + 2;
+}
+
+function renderProgressChart() {
+  const sessions = getLastSessions(20);
+  const chartEmpty = document.getElementById('chart-empty');
+  const chartCanvas = document.getElementById('progress-chart');
+  const chartSuggest = document.getElementById('chart-suggest');
+
+  const hasRepsData = sessions.some(s => s.entry.reps && Object.keys(s.entry.reps).length > 0);
+
+  if (sessions.length < 2 || !hasRepsData) {
+    chartEmpty.style.display = 'block';
+    chartCanvas.style.display = 'none';
+    chartSuggest.style.display = 'none';
+    if (progressChart) { progressChart.destroy(); progressChart = null; }
+    return;
+  }
+
+  chartEmpty.style.display = 'none';
+  chartCanvas.style.display = 'block';
+  chartSuggest.style.display = 'block';
+
+  const labels = sessions.map(s => s.label);
+  const flexData = sessions.map(s => (s.entry.reps && s.entry.reps.flex) || null);
+  const squatData = sessions.map(s => (s.entry.reps && s.entry.reps.squat) || null);
+  const rotData = sessions.map(s => (s.entry.reps && s.entry.reps.rotation) || null);
+
+  if (progressChart) { progressChart.destroy(); progressChart = null; }
+
+  const ctx = chartCanvas.getContext('2d');
+  progressChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Flex', data: flexData, borderColor: '#c8f060', backgroundColor: 'rgba(200,240,96,0.08)', tension: 0.3, spanGaps: true, pointRadius: 4, pointBackgroundColor: '#c8f060', borderWidth: 2 },
+        { label: 'Squat', data: squatData, borderColor: '#60d4c8', backgroundColor: 'rgba(96,212,200,0.08)', tension: 0.3, spanGaps: true, pointRadius: 4, pointBackgroundColor: '#60d4c8', borderWidth: 2 },
+        { label: 'Rot.', data: rotData, borderColor: '#f0a060', backgroundColor: 'rgba(240,160,96,0.08)', tension: 0.3, spanGaps: true, pointRadius: 4, pointBackgroundColor: '#f0a060', borderWidth: 2 },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { labels: { color: '#6b6960', font: { family: 'DM Mono', size: 10 }, boxWidth: 10, padding: 10 } }
+      },
+      scales: {
+        x: { ticks: { color: '#6b6960', font: { family: 'DM Mono', size: 9 }, maxRotation: 0 }, grid: { color: '#2e2e2a' } },
+        y: { beginAtZero: false, min: 1, ticks: { color: '#6b6960', font: { family: 'DM Mono', size: 9 }, stepSize: 1 }, grid: { color: '#2e2e2a' } }
+      }
+    }
+  });
+
+  const sugFlex = getSuggestedReps('flex', sessions);
+  const sugSquat = getSuggestedReps('squat', sessions);
+  const sugRot = getSuggestedReps('rotation', sessions);
+  chartSuggest.innerHTML = `Objetivo sugerido → Flex: <strong>${sugFlex}</strong> · Squat: <strong>${sugSquat}</strong> · Rot: <strong>${sugRot}</strong>`;
+}
+
 // ── HEADER ───────────────────────────────────────────────────
 function updateHeader() {
   const now = localNow();
@@ -599,6 +731,7 @@ function confirmYesterday() {
   renderHistory();
   showNotif("Ayer marcado como completado");
 }
+
 function init() {
   checkMissedDays();
   updateHeader();
@@ -612,6 +745,7 @@ function init() {
   renderExercises();
   showDoneToday();
   renderHistory();
+  renderProgressChart();
   setInterval(checkAlarm, 15000);
 }
 
