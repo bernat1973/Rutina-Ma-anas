@@ -384,6 +384,21 @@ function updateTimerInfo() {
   });
 }
 
+// ── AUDIO ────────────────────────────────────────────────────
+function playBeep(freq, duration, volume) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume || 0.4, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
 // ── PLANK TIMER ──────────────────────────────────────────────
 let plankInterval = null, plankSeconds = 0, plankRunning = false;
 
@@ -398,7 +413,13 @@ function startPlankTimer() {
     plankSeconds++;
     updatePlankDisplay();
     const target = getPlankTarget();
-    if (plankSeconds >= target) { stopPlankTimer(); }
+    const remaining = target - plankSeconds;
+    if (remaining <= 0) {
+      playBeep(880, 0.8, 0.6); // pitido largo al llegar
+      stopPlankTimer();
+    } else if (remaining <= 5) {
+      playBeep(660, 0.15, 0.4); // pitido corto cuenta atrás
+    }
   }, 1000);
 }
 
